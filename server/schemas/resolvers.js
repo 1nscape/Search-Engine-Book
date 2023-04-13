@@ -30,13 +30,37 @@ const resolvers = {
         }
         const token = signToken (user);
     },
-    addUser: async (parent, args) => {
+    addingUser: async (parent, args) => {
         const user = await User.create(args);
         const token = signToken(user);
         return {token, user};
 
     },
-    
+    savedBook: async (parent, { bookData }, context) => {
+        if (context.user) {
+            const userUpdate = await User.findByIdAndUpdate(
+                { _id: context.user_.id },
+                { $push: { savedBooks: bookData }},
+                {new: true }
+            );
+            return userUpdate;
+        }
+
+        throw new AuthenticationError ('Please log in');
+    },
+
+    removedBook: async (parent, { bookId }, context) => {
+        if (context.user) {
+            const userUpdate = await User.findOneAndUpdate (
+                { _id: context.user._id },
+                { $pull: { savedBooks: { bookId } } },
+                { new: true }
+                );
+
+                return userUpdate;
+        }
+        throw new AuthenticationError ('Please log in');
+    }
     
 
   }
@@ -44,4 +68,4 @@ const resolvers = {
 }
   
 
-module.exports = resolvers
+module.exports = resolvers;
